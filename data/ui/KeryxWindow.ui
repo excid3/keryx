@@ -6,6 +6,7 @@
   <!-- interface-local-resource-path ../media -->
   <object class="GtkListStore" id="downloads_liststore"/>
   <object class="GtkListStore" id="computers_liststore"/>
+  <object class="GtkListStore" id="packages_liststore"/>
   <object class="KeryxWindow" id="keryx_window">
     <property name="title" translatable="yes">Keryx</property>
     <property name="window_position">center</property>
@@ -327,7 +328,6 @@
                                 <child>
                                   <object class="GtkLabel" id="label4">
                                     <property name="visible">True</property>
-                                    <property name="xalign">1</property>
                                     <property name="label" translatable="yes">Have a managed computer that is not listed? Try browsing:</property>
                                   </object>
                                   <packing>
@@ -498,6 +498,10 @@
                 <child>
                   <object class="GtkAlignment" id="computer_tab">
                     <property name="visible">True</property>
+                    <property name="top_padding">10</property>
+                    <property name="bottom_padding">10</property>
+                    <property name="left_padding">10</property>
+                    <property name="right_padding">10</property>
                     <child>
                       <object class="GtkHPaned" id="hpaned1">
                         <property name="visible">True</property>
@@ -961,6 +965,10 @@
                 <child>
                   <object class="GtkAlignment" id="downloads_tab">
                     <property name="visible">True</property>
+                    <property name="top_padding">10</property>
+                    <property name="bottom_padding">10</property>
+                    <property name="left_padding">10</property>
+                    <property name="right_padding">10</property>
                     <child>
                       <object class="GtkTreeView" id="downloads_treeview">
                         <property name="visible">True</property>
@@ -1021,5 +1029,4 @@
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
-  <object class="GtkListStore" id="packages_liststore"/>
 </interface>
