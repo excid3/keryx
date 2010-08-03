@@ -100,13 +100,21 @@ class KeryxWindow(gtk.Window):
         #self.preferences = dlg.get_preferences()
 
         # Code for other initialization actions should be added here.
-        self.notebook = self.builder.get_object("notebook1")
+        self.notebook = self.builder.get_object("notebook")
          
         name = self.builder.get_object("add_computer_name_entry")
         name.set_text(platform.node()) 
                
         # Request default window size
         self.set_size_request(600, 400)
+        
+        # Assign widgets
+        self.computer = self.builder.get_object("computer_tab")
+        self.preferences = self.builder.get_object("preferences_tab")
+        self.downloads = self.builder.get_object("downloads_tab")
+        #self.computer.set_visible(False)
+        #self.preferences.set_visible(False)
+        #self.downloads.set_visible(False)
 
     def about(self, widget, data=None):
         """Display the about box for keryx."""
@@ -115,14 +123,11 @@ class KeryxWindow(gtk.Window):
         about.destroy()
 
     def preferences(self, widget, data=None):
-        pass
-#        """Display the preferences window for keryx."""
-#        prefs = PreferencesKeryxDialog.PreferencesKeryxDialog()
-#        response = prefs.run()
-#        if response == gtk.RESPONSE_OK:
-#            # Make any updates based on changed preferences here.
-#            pass
-#        prefs.destroy()
+        """Display the preferences window for keryx."""
+        visible = self.preferences.get_visible()
+        self.preferences.set_visible(not visible)
+        if not visible:
+            self.notebook.set_current_page(self.notebook.page_num(self.preferences))
 
     def quit(self, widget, data=None):
         """Signal handler for closing the KeryxWindow."""
