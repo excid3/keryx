@@ -1,0 +1,4 @@
+project = keryx
+version = 0.4.3
+template = ubuntu-application
+bzrbranch = lp:~excid3/keryx/keryx-1.0
