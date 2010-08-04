@@ -445,6 +445,7 @@
                           </object>
                           <packing>
                             <property name="expand">False</property>
+                            <property name="padding">5</property>
                             <property name="position">4</property>
                           </packing>
                         </child>
@@ -578,7 +579,6 @@
                                 <property name="xalign">0</property>
                                 <property name="label" translatable="yes">Package Name</property>
                                 <attributes>
-                                  <attribute name="weight" value="bold"/>
                                   <attribute name="scale" value="2.000000"/>
                                 </attributes>
                               </object>
@@ -594,6 +594,7 @@
                                 <property name="editable">False</property>
                               </object>
                               <packing>
+                                <property name="padding">5</property>
                                 <property name="position">1</property>
                               </packing>
                             </child>
