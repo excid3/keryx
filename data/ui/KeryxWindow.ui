@@ -5,8 +5,28 @@
   <!-- interface-naming-policy project-wide -->
   <!-- interface-local-resource-path ../media -->
   <object class="GtkListStore" id="downloads_liststore"/>
-  <object class="GtkListStore" id="computers_liststore"/>
-  <object class="GtkListStore" id="packages_liststore"/>
+  <object class="GtkListStore" id="computers_liststore">
+    <columns>
+      <!-- column-name name -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">Test Computer</col>
+      </row>
+    </data>
+  </object>
+  <object class="GtkListStore" id="packages_liststore">
+    <columns>
+      <!-- column-name name -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">Test Package</col>
+      </row>
+    </data>
+  </object>
   <object class="KeryxWindow" id="keryx_window">
     <property name="title" translatable="yes">Keryx</property>
     <property name="window_position">center</property>
@@ -255,10 +275,24 @@
                               <object class="GtkHBox" id="hbox2">
                                 <property name="visible">True</property>
                                 <child>
-                                  <object class="GtkTreeView" id="treeview1">
+                                  <object class="GtkTreeView" id="computers_treeview">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="model">computers_liststore</property>
+                                    <property name="search_column">0</property>
+                                    <child>
+                                      <object class="GtkTreeViewColumn" id="computer_treeviewcolumn">
+                                        <property name="title">Computer Name</property>
+                                        <property name="sort_indicator">True</property>
+                                        <property name="sort_column_id">0</property>
+                                        <child>
+                                          <object class="GtkCellRendererText" id="cellrenderertext1"/>
+                                          <attributes>
+                                            <attribute name="text">0</attribute>
+                                          </attributes>
+                                        </child>
+                                      </object>
+                                    </child>
                                   </object>
                                   <packing>
                                     <property name="padding">5</property>
@@ -510,10 +544,25 @@
                         <property name="position">200</property>
                         <property name="position_set">True</property>
                         <child>
-                          <object class="GtkTreeView" id="treeview2">
+                          <object class="GtkTreeView" id="packages_treeview">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="model">packages_liststore</property>
+                            <property name="search_column">0</property>
+                            <property name="enable_grid_lines">horizontal</property>
+                            <child>
+                              <object class="GtkTreeViewColumn" id="packages_treeviewcolumn">
+                                <property name="title">Package</property>
+                                <property name="sort_indicator">True</property>
+                                <property name="sort_column_id">0</property>
+                                <child>
+                                  <object class="GtkCellRendererText" id="cellrenderertext2"/>
+                                  <attributes>
+                                    <attribute name="text">0</attribute>
+                                  </attributes>
+                                </child>
+                              </object>
+                            </child>
                           </object>
                           <packing>
                             <property name="resize">True</property>

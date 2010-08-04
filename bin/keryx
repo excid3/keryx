@@ -115,6 +115,13 @@ class KeryxWindow(gtk.Window):
         #self.computer.set_visible(False)
         #self.preferences.set_visible(False)
         #self.downloads.set_visible(False)
+        
+        self.computers_list = self.builder.get_object("computers_liststore")
+        self.computers_list.append(["Computer A"])
+        
+        #self.computers_treeview = self.builder.get_object("computers_treeview")
+        #self.computers_treeview.append_column(gtk.TreeViewColumn("Computer"))
+        
 
     def about(self, widget, data=None):
         """Display the about box for keryx."""
