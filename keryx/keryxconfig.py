@@ -72,9 +72,9 @@ def get_data_path():
     
 class Config:
     section = "keryx"
-    defaults = [("data", "data"), 
-                ("projects", "data/projects"), 
-                ("downloads", "data/downloads"),
+    defaults = [("data", get_data_path()), 
+                ("projects", os.path.join(get_data_path(), "projects")), 
+                ("downloads", os.path.join(get_data_path(), "downloads")),
                 ("proxy", "False"),
                 ("proxy_url", "http://localhost"),
                 ("proxy_port", "3182"),
