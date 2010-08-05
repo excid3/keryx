@@ -43,7 +43,7 @@ if (os.path.exists(os.path.join(PROJECT_ROOT_DIRECTORY, 'keryx'))
     os.putenv('PYTHONPATH', PROJECT_ROOT_DIRECTORY) # for subprocesses
 
 from keryx import (
-    AboutKeryxDialog, PreferencesKeryxDialog)
+    AboutKeryxDialog, keryxconfig)
 from keryx.helpers import create_tab, create_closeable_tab, get_builder
 
 
@@ -96,8 +96,7 @@ class KeryxWindow(gtk.Window):
                 launchpad_available = False
 
         # Uncomment the following code to read in preferences at start up.
-        #dlg = PreferencesKeryxDialog.PreferencesKeryxDialog()
-        #self.preferences = dlg.get_preferences()
+        self.config = keryxconfig.Config()
 
         # Code for other initialization actions should be added here.
         self.notebook = self.builder.get_object("notebook")
@@ -109,19 +108,41 @@ class KeryxWindow(gtk.Window):
         self.set_size_request(600, 400)
         
         # Assign widgets
+        self._assign_widgets()
+        
+        
+    def _assign_widgets(self):
+        """Initialize and assign widgets to variables"""
         self.computer = self.builder.get_object("computer_tab")
         self.preferences = self.builder.get_object("preferences_tab")
         self.downloads = self.builder.get_object("downloads_tab")
-        #self.computer.set_visible(False)
-        #self.preferences.set_visible(False)
-        #self.downloads.set_visible(False)
+        self.computer.set_visible(False)
+        self.preferences.set_visible(False)
+        self.downloads.set_visible(False)
         
         self.computers_list = self.builder.get_object("computers_liststore")
-        self.computers_list.append(["Computer A"])
+        self.computers_list.clear()
         
-        #self.computers_treeview = self.builder.get_object("computers_treeview")
-        #self.computers_treeview.append_column(gtk.TreeViewColumn("Computer"))
+        self.packages_list = self.builder.get_object("packages_liststore")
+        self.packages_list.clear()
         
+
+    def on_add_button_clicked(self, widget, data=None):
+        status_file = "/var/lib/dpkg/status"
+        sources_file = "/etc/apt/sources.list"
+        
+        if not os.path.exists(status_file) or \
+           not os.path.exists(sources_file):
+            md = gtk.MessageDialog(self, 
+                gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_ERROR, 
+                gtk.BUTTONS_OK, "Sorry, you can only add Debian based Linux distros.\nPlease use Keryx on your offline machine.")
+            md.set_title("Error Adding Computer")
+            md.run()
+            md.destroy()
+            
+        
+    
+        name = self.builder.get_object("add_computer_name_entry").get_text()
 
     def about(self, widget, data=None):
         """Display the about box for keryx."""
@@ -143,6 +164,7 @@ class KeryxWindow(gtk.Window):
     def on_destroy(self, widget, data=None):
         """Called when the KeryxWindow is closed."""
         # Clean up code for saving application state should be added here.
+        self.config.save()
         gtk.main_quit()
         
     def on_proxy_manual_radiobutton_toggled(self, widget, data=None):

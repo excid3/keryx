@@ -31,6 +31,7 @@ __all__ = [
 __keryx_data_directory__ = '../data/'
 __license__ = 'GPL-3'
 
+import ConfigParser
 import os
 
 import gettext
@@ -68,3 +69,34 @@ def get_data_path():
         raise project_path_not_found
 
     return abs_data_path
+    
+class Config:
+    section = "keryx"
+    defaults = {}
+
+    def __init__(self, config_file=None):
+        self._config = ConfigParser.SafeConfigParser(self.defaults)
+
+        config_path = config_file or os.path.join(get_data_path(), "keryx.conf")
+        if os.path.exists(config_path):
+            self._load_config(config_path)
+        self.config_file = config_path
+        
+        projects_path = os.path.join(get_data_path(), "projects")
+        
+        if not os.path.exists(projects_path):
+            os.mkdir(projects_path)    
+    
+    def get(self, key):
+        """Retrieve a configuration key"""
+        return self._config.get(self.section, key)
+        
+    def _load_config(self, filename):
+        """Parse a configuration file"""
+        self._config.read(filename)
+            
+    def save(self):
+        print "saving config"
+        with open(self.config_file, "wb") as configfile:
+            self._config.write(configfile)
+
