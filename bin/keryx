@@ -132,14 +132,14 @@ class KeryxWindow(gtk.Window):
         projects_chooser = self._get("projects_filechooserbutton")
         path = os.path.abspath(self.config.get("projects"))
         if not os.path.exists(path):
-            os.mkdir(path)
+            os.makedirs(path)
         projects_chooser.set_current_folder(path)
         
         # Create and set the downloads folder
         downloads_chooser = self._get("downloads_filechooserbutton")
         path = os.path.abspath(self.config.get("downloads"))
         if not os.path.exists(path):
-            os.mkdir(path)
+            os.makedirs(path)
         downloads_chooser.set_current_folder(path)
         
         # Set proxy
@@ -219,7 +219,7 @@ class KeryxWindow(gtk.Window):
         self._get("preferences_label").set_text("Preferences reset")
         self.load_config()
         
-    def on_switch_tab(self, widget, data=None):
+    def on_switch_tab(self, notebook, page, page_num, data=None):
         self._get("preferences_label").set_text("Click Save to apply changes")
         
     def _get(self, name):
