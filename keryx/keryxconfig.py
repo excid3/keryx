@@ -72,14 +72,24 @@ def get_data_path():
     
 class Config:
     section = "keryx"
-    defaults = {}
+    defaults = [("data", "data"), 
+                ("projects", "data/projects"), 
+                ("downloads", "data/downloads"),
+                ("proxy", "False"),
+                ("proxy_url", "http://localhost"),
+                ("proxy_port", "3182"),
+                ("proxy_username", ""),
+                ("proxy_password", ""),
+                ]
 
     def __init__(self, config_file=None):
-        self._config = ConfigParser.SafeConfigParser(self.defaults)
+        self._config = ConfigParser.ConfigParser()
 
         config_path = config_file or os.path.join(get_data_path(), "keryx.conf")
         if os.path.exists(config_path):
             self._load_config(config_path)
+        else:
+            self._set_defaults()
         self.config_file = config_path
         
         projects_path = os.path.join(get_data_path(), "projects")
@@ -87,14 +97,35 @@ class Config:
         if not os.path.exists(projects_path):
             os.mkdir(projects_path)    
     
+    def get_filename(self):
+        return self.config_file
+    
+    def set(self, key, value):
+        self._config.set(self.section, key, str(value))
+    
     def get(self, key):
         """Retrieve a configuration key"""
-        return self._config.get(self.section, key)
+        try:
+            return self._config.get(self.section, key)
+        except:
+            self._set_defaults()
+            return self._config.get(self.section, key)
+            
+    def _set_defaults(self):
+        try:
+            self._config.add_section("keryx")
+        except:
+            pass
+            
+        # Initialize defaults if key isn't available
+        for key, val in self.defaults:
+            if not self._config.has_option(self.section, key):
+                self._config.set(self.section, key, val)
         
     def _load_config(self, filename):
         """Parse a configuration file"""
         self._config.read(filename)
-            
+        
     def save(self):
         print "saving config"
         with open(self.config_file, "wb") as configfile:

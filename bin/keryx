@@ -88,7 +88,7 @@ class KeryxWindow(gtk.Window):
         if launchpad_available:
             # see https://wiki.ubuntu.com/UbuntuDevelopment/Internationalisation/Coding for more information
             # about LaunchpadIntegration
-            helpmenu = self.builder.get_object('helpMenu')
+            helpmenu = self._get('helpMenu')
             if helpmenu:
                 LaunchpadIntegration.set_sourcepackagename('keryx')
                 LaunchpadIntegration.add_items(helpmenu, 0, False, True)
@@ -99,33 +99,58 @@ class KeryxWindow(gtk.Window):
         self.config = keryxconfig.Config()
 
         # Code for other initialization actions should be added here.
-        self.notebook = self.builder.get_object("notebook")
+        self.notebook = self._get("notebook")
          
-        name = self.builder.get_object("add_computer_name_entry")
+        name = self._get("add_computer_name_entry")
         name.set_text(platform.node()) 
                
         # Request default window size
         self.set_size_request(600, 400)
         
         # Assign widgets
-        self._assign_widgets()
+        self._initial_configuration()
+        self.load_config()
         
-        
-    def _assign_widgets(self):
+    def _initial_configuration(self):
         """Initialize and assign widgets to variables"""
-        self.computer = self.builder.get_object("computer_tab")
-        self.preferences = self.builder.get_object("preferences_tab")
-        self.downloads = self.builder.get_object("downloads_tab")
+        self.computer = self._get("computer_tab")
+        self.preferences = self._get("preferences_tab")
+        self.downloads = self._get("downloads_tab")
         self.computer.set_visible(False)
-        self.preferences.set_visible(False)
+        #self.preferences.set_visible(False)
         self.downloads.set_visible(False)
         
-        self.computers_list = self.builder.get_object("computers_liststore")
+        self.computers_list = self._get("computers_liststore")
         self.computers_list.clear()
         
-        self.packages_list = self.builder.get_object("packages_liststore")
+        self.packages_list = self._get("packages_liststore")
         self.packages_list.clear()
         
+        
+    def load_config(self):
+        # Create and set the projects folder
+        projects_chooser = self._get("projects_filechooserbutton")
+        path = os.path.abspath(self.config.get("projects"))
+        if not os.path.exists(path):
+            os.mkdir(path)
+        projects_chooser.set_current_folder(path)
+        
+        # Create and set the downloads folder
+        downloads_chooser = self._get("downloads_filechooserbutton")
+        path = os.path.abspath(self.config.get("downloads"))
+        if not os.path.exists(path):
+            os.mkdir(path)
+        downloads_chooser.set_current_folder(path)
+        
+        # Set proxy
+        active = self.config.get("proxy") == "True"
+        self._get("proxy_manual_radiobutton").set_active(active)
+        self._get("proxy_direct_radiobutton").set_active(not active)
+
+        self._get("proxy_entry").set_text(self.config.get("proxy_url"))
+        self._get("proxy_port_spinbutton").set_value(float(self.config.get("proxy_port")))
+        self._get("proxy_username_entry").set_text(self.config.get("proxy_username"))
+        self._get("proxy_password_entry").set_text(self.config.get("proxy_password"))
 
     def on_add_button_clicked(self, widget, data=None):
         status_file = "/var/lib/dpkg/status"
@@ -139,10 +164,10 @@ class KeryxWindow(gtk.Window):
             md.set_title("Error Adding Computer")
             md.run()
             md.destroy()
-            
-        
+            return
     
-        name = self.builder.get_object("add_computer_name_entry").get_text()
+        name = self._get("add_computer_name_entry").get_text()
+        print self.config.get("projects")
 
     def about(self, widget, data=None):
         """Display the about box for keryx."""
@@ -156,7 +181,7 @@ class KeryxWindow(gtk.Window):
         self.preferences.set_visible(not visible)
         if not visible:
             self.notebook.set_current_page(self.notebook.page_num(self.preferences))
-
+     
     def quit(self, widget, data=None):
         """Signal handler for closing the KeryxWindow."""
         self.destroy()
@@ -174,8 +199,31 @@ class KeryxWindow(gtk.Window):
         
         # Set manual proxy entries sensitive as necessary
         for item in widgets:
-            self.builder.get_object(item).set_sensitive(s)
+            self._get(item).set_sensitive(s)
+
+    def on_preferences_changed(self, widget, data=None):
+        self.config.set("projects", self._get("projects_filechooserbutton").get_current_folder())
+        self.config.set("downloads", self._get("downloads_filechooserbutton").get_current_folder())
         
+        self.config.set("proxy", self._get("proxy_manual_radiobutton").get_active())
+        self.config.set("proxy_url", self._get("proxy_entry").get_text())
+        self.config.set("proxy_port", str(self._get("proxy_port_spinbutton").get_value()))
+        self.config.set("proxy_username", self._get("proxy_username_entry").get_text())
+        self.config.set("proxy_password", self._get("proxy_password_entry").get_text())
+        
+        self.config.save()
+        
+        self._get("preferences_label").set_text("Preferences saved to %s" % self.config.get_filename())
+        
+    def on_preferences_reset(self, widget, data=None):
+        self._get("preferences_label").set_text("Preferences reset")
+        self.load_config()
+        
+    def on_switch_tab(self, widget, data=None):
+        self._get("preferences_label").set_text("Click Save to apply changes")
+        
+    def _get(self, name):
+        return self.builder.get_object(name)
 
 if __name__ == "__main__":
     # Support for command line options.
