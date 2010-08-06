@@ -152,11 +152,14 @@ class KeryxWindow(gtk.Window):
         self._get("proxy_username_entry").set_text(self.config.get("proxy_username"))
         self._get("proxy_password_entry").set_text(self.config.get("proxy_password"))
 
+
+    #TODO: Move errors to their own function to be called easily
     def on_add_button_clicked(self, widget, data=None):
         status_file = "/var/lib/dpkg/status"
         sources_file = "/etc/apt/sources.list"
         
-        if not os.path.exists(status_file) or \
+        if not platform.system() == "Linux" or \
+           not os.path.exists(status_file) or \
            not os.path.exists(sources_file):
             md = gtk.MessageDialog(self, 
                 gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_ERROR, 
@@ -167,8 +170,39 @@ class KeryxWindow(gtk.Window):
             return
     
         name = self._get("add_computer_name_entry").get_text()
-        print self.config.get("projects")
-
+        
+        path = os.path.join(self.config.get("projects"), name)
+        if os.path.exists(path):
+            md = gtk.MessageDialog(self, 
+                gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_ERROR, 
+                gtk.BUTTONS_OK, "The computer appears to have already been added.\nMake sure you to use a different name for each computer.")
+            md.set_title("Error Adding Computer")
+            md.run()
+            md.destroy()
+            print path
+            return
+        
+        os.makedirs(path)
+        f = open(os.path.join(path, "%s.keryx" % name), "wb")
+        f.write("%s\napt" % name)
+        f.close()
+        
+        self.computers_list.append([name])
+        
+        f = open(os.path.join(path, "apt.conf"), "wb")
+        f.write("%s\n%s\n%s\n%s" % (platform.uname()[1], 
+                                    " ".join(platform.linux_distribution()), 
+                                    platform.machine(),
+                                    platform.release()))
+        f.close()
+        
+        md = gtk.MessageDialog(self, 
+            gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_INFO, 
+            gtk.BUTTONS_OK, "Computer added successfully!\nNow you can click Manage to select some packages to download later or you can move Keryx to a computer with internet access to get started.")
+        md.set_title("Everything Went Better Than Expected")
+        md.run()
+        md.destroy()
+        
     def about(self, widget, data=None):
         """Display the about box for keryx."""
         about = AboutKeryxDialog.AboutKeryxDialog()
