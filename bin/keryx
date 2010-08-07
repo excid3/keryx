@@ -44,6 +44,8 @@ if (os.path.exists(os.path.join(PROJECT_ROOT_DIRECTORY, 'keryx'))
 
 from keryx import (
     AboutKeryxDialog, keryxconfig)
+from keryx.MessageDialogs import (error_dialog, info_dialog, question_dialog,
+                                  warning_dialog)
 from keryx.helpers import create_tab, create_closeable_tab, get_builder
 
 
@@ -160,25 +162,23 @@ class KeryxWindow(gtk.Window):
         
         if not platform.system() == "Linux" or \
            not os.path.exists(status_file) or \
-           not os.path.exists(sources_file):
-            md = gtk.MessageDialog(self, 
-                gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_ERROR, 
-                gtk.BUTTONS_OK, "Sorry, you can only add Debian based Linux distros.\nPlease use Keryx on your offline machine.")
-            md.set_title("Error Adding Computer")
-            md.run()
-            md.destroy()
+           not os.path.exists(sources_file):  # FIXME: Not everyone has a main sources_file.
+            error_dialog(self, 
+                         "Sorry, you can only add Debian based Linux " \
+                         "distros.\nPlease use Keryx on your offline " \
+                         "machine.",
+                         "Error adding computer")
             return
     
         name = self._get("add_computer_name_entry").get_text()
         
         path = os.path.join(self.config.get("projects"), name)
         if os.path.exists(path):
-            md = gtk.MessageDialog(self, 
-                gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_ERROR, 
-                gtk.BUTTONS_OK, "The computer appears to have already been added.\nMake sure you to use a different name for each computer.")
-            md.set_title("Error Adding Computer")
-            md.run()
-            md.destroy()
+            error_dialog(self, 
+                         "The computer appears to have already been added.\n" \
+                         "Make sure you to use a different name for each " \
+                         "computer.",
+                         "Error Adding Computer")
             print path
             return
         
@@ -198,12 +198,12 @@ class KeryxWindow(gtk.Window):
         
         #TODO: Copy status and lists files
         
-        md = gtk.MessageDialog(self, 
-            gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_INFO, 
-            gtk.BUTTONS_OK, "Computer added successfully!\nNow you can click Manage to select some packages to download later or you can move Keryx to a computer with internet access to get started.")
-        md.set_title("Everything Went Better Than Expected")
-        md.run()
-        md.destroy()
+        info_dialog(self, 
+                    "Computer added successfully!\nNow you can click Manage " \
+                    "to select some packages to download later or you can " \
+                    "move Keryx to a computer with internet access to get " \
+                    "started.",
+                    "Everything Went Better Than Expected")
         
     def about(self, widget, data=None):
         """Display the about box for keryx."""
@@ -230,7 +230,10 @@ class KeryxWindow(gtk.Window):
         
     def on_proxy_manual_radiobutton_toggled(self, widget, data=None):
         """Called when Manual proxy configuration is toggled"""
-        widgets = ["proxy_entry", "proxy_port_spinbutton", "proxy_username_entry", "proxy_password_entry"]
+        widgets = ["proxy_entry", 
+                   "proxy_port_spinbutton", 
+                   "proxy_username_entry", 
+                   "proxy_password_entry"]
         s = widget.get_active()
         
         # Set manual proxy entries sensitive as necessary
