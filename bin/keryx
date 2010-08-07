@@ -196,6 +196,8 @@ class KeryxWindow(gtk.Window):
                                     platform.release()))
         f.close()
         
+        #TODO: Copy status and lists files
+        
         md = gtk.MessageDialog(self, 
             gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_INFO, 
             gtk.BUTTONS_OK, "Computer added successfully!\nNow you can click Manage to select some packages to download later or you can move Keryx to a computer with internet access to get started.")
