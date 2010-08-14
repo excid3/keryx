@@ -5,17 +5,6 @@
   <!-- interface-naming-policy project-wide -->
   <!-- interface-local-resource-path ../media -->
   <object class="GtkListStore" id="downloads_liststore"/>
-  <object class="GtkListStore" id="computers_liststore">
-    <columns>
-      <!-- column-name name -->
-      <column type="gchararray"/>
-    </columns>
-    <data>
-      <row>
-        <col id="0" translatable="yes">Test Computer</col>
-      </row>
-    </data>
-  </object>
   <object class="GtkListStore" id="packages_liststore">
     <columns>
       <!-- column-name name -->
@@ -24,6 +13,20 @@
     <data>
       <row>
         <col id="0" translatable="yes">Test Package</col>
+      </row>
+    </data>
+  </object>
+  <object class="GtkListStore" id="computers_liststore">
+    <columns>
+      <!-- column-name name -->
+      <column type="gchararray"/>
+      <!-- column-name location -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">Test Computer</col>
+        <col id="1" translatable="yes">data/projects/test</col>
       </row>
     </data>
   </object>
@@ -276,27 +279,36 @@
                               <object class="GtkHBox" id="hbox2">
                                 <property name="visible">True</property>
                                 <child>
-                                  <object class="GtkTreeView" id="computers_treeview">
+                                  <object class="GtkScrolledWindow" id="scrolledwindow3">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
-                                    <property name="model">computers_liststore</property>
-                                    <property name="search_column">0</property>
+                                    <property name="hscrollbar_policy">automatic</property>
+                                    <property name="vscrollbar_policy">automatic</property>
+                                    <property name="shadow_type">out</property>
                                     <child>
-                                      <object class="GtkTreeViewColumn" id="computer_treeviewcolumn">
-                                        <property name="title">Computer Name</property>
-                                        <property name="sort_indicator">True</property>
-                                        <property name="sort_column_id">0</property>
+                                      <object class="GtkTreeView" id="computers_treeview">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="model">computers_liststore</property>
+                                        <property name="search_column">0</property>
                                         <child>
-                                          <object class="GtkCellRendererText" id="cellrenderertext1"/>
-                                          <attributes>
-                                            <attribute name="text">0</attribute>
-                                          </attributes>
+                                          <object class="GtkTreeViewColumn" id="computer_treeviewcolumn">
+                                            <property name="title">Computer Name</property>
+                                            <property name="clickable">True</property>
+                                            <property name="sort_indicator">True</property>
+                                            <property name="sort_column_id">0</property>
+                                            <child>
+                                              <object class="GtkCellRendererText" id="cellrenderertext1"/>
+                                              <attributes>
+                                                <attribute name="text">0</attribute>
+                                              </attributes>
+                                            </child>
+                                          </object>
                                         </child>
                                       </object>
                                     </child>
                                   </object>
                                   <packing>
-                                    <property name="padding">5</property>
                                     <property name="position">0</property>
                                   </packing>
                                 </child>
@@ -307,10 +319,11 @@
                                       <object class="GtkVBox" id="vbox8">
                                         <property name="visible">True</property>
                                         <child>
-                                          <object class="GtkButton" id="button2">
+                                          <object class="GtkButton" id="manage_button">
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
                                             <property name="receives_default">True</property>
+                                            <signal name="clicked" handler="on_manage_button_clicked"/>
                                             <child>
                                               <object class="GtkHBox" id="hbox8">
                                                 <property name="visible">True</property>
@@ -318,6 +331,7 @@
                                                   <object class="GtkImage" id="image2">
                                                     <property name="visible">True</property>
                                                     <property name="stock">gtk-go-forward</property>
+                                                    <property name="icon-size">2</property>
                                                   </object>
                                                   <packing>
                                                     <property name="padding">5</property>
@@ -383,6 +397,7 @@
                                           <object class="GtkImage" id="image1">
                                             <property name="visible">True</property>
                                             <property name="stock">gtk-open</property>
+                                            <property name="icon-size">2</property>
                                           </object>
                                           <packing>
                                             <property name="padding">5</property>
@@ -489,6 +504,7 @@
                                       <object class="GtkImage" id="image3">
                                         <property name="visible">True</property>
                                         <property name="stock">gtk-add</property>
+                                        <property name="icon-size">2</property>
                                       </object>
                                       <packing>
                                         <property name="padding">5</property>
@@ -547,28 +563,38 @@
                         <property name="position">200</property>
                         <property name="position_set">True</property>
                         <child>
-                          <object class="GtkTreeView" id="packages_treeview">
+                          <object class="GtkScrolledWindow" id="scrolledwindow2">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="model">packages_liststore</property>
-                            <property name="search_column">0</property>
-                            <property name="enable_grid_lines">horizontal</property>
+                            <property name="hscrollbar_policy">automatic</property>
+                            <property name="vscrollbar_policy">automatic</property>
+                            <property name="shadow_type">out</property>
                             <child>
-                              <object class="GtkTreeViewColumn" id="packages_treeviewcolumn">
-                                <property name="title">Package</property>
-                                <property name="sort_indicator">True</property>
-                                <property name="sort_column_id">0</property>
+                              <object class="GtkTreeView" id="packages_treeview">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="model">packages_liststore</property>
+                                <property name="search_column">0</property>
+                                <property name="enable_grid_lines">horizontal</property>
                                 <child>
-                                  <object class="GtkCellRendererText" id="cellrenderertext2"/>
-                                  <attributes>
-                                    <attribute name="text">0</attribute>
-                                  </attributes>
+                                  <object class="GtkTreeViewColumn" id="packages_treeviewcolumn">
+                                    <property name="title">Package Name</property>
+                                    <property name="clickable">True</property>
+                                    <property name="sort_indicator">True</property>
+                                    <property name="sort_column_id">0</property>
+                                    <child>
+                                      <object class="GtkCellRendererText" id="cellrenderertext2"/>
+                                      <attributes>
+                                        <attribute name="text">0</attribute>
+                                      </attributes>
+                                    </child>
+                                  </object>
                                 </child>
                               </object>
                             </child>
                           </object>
                           <packing>
-                            <property name="resize">True</property>
+                            <property name="resize">False</property>
                             <property name="shrink">True</property>
                           </packing>
                         </child>
@@ -576,7 +602,7 @@
                           <object class="GtkVBox" id="vbox4">
                             <property name="visible">True</property>
                             <child>
-                              <object class="GtkLabel" id="label23">
+                              <object class="GtkLabel" id="package_name_label">
                                 <property name="visible">True</property>
                                 <property name="xalign">0</property>
                                 <property name="label" translatable="yes">Package Name</property>
@@ -590,13 +616,27 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkTextView" id="textview1">
+                              <object class="GtkScrolledWindow" id="scrolledwindow1">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
-                                <property name="editable">False</property>
+                                <property name="hscrollbar_policy">automatic</property>
+                                <property name="vscrollbar_policy">automatic</property>
+                                <property name="shadow_type">out</property>
+                                <child>
+                                  <object class="GtkTextView" id="package_details_textview">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="pixels_above_lines">5</property>
+                                    <property name="editable">False</property>
+                                    <property name="wrap_mode">word</property>
+                                    <property name="left_margin">11</property>
+                                    <property name="right_margin">10</property>
+                                    <property name="cursor_visible">False</property>
+                                    <property name="buffer">package_textbuffer</property>
+                                  </object>
+                                </child>
                               </object>
                               <packing>
-                                <property name="padding">5</property>
                                 <property name="position">1</property>
                               </packing>
                             </child>
@@ -659,7 +699,7 @@
                   </packing>
                 </child>
                 <child type="tab">
-                  <object class="GtkLabel" id="label22">
+                  <object class="GtkLabel" id="name_label">
                     <property name="visible">True</property>
                     <property name="label" translatable="yes">Computer</property>
                   </object>
@@ -710,8 +750,8 @@
                                         <child>
                                           <object class="GtkFileChooserButton" id="projects_filechooserbutton">
                                             <property name="visible">True</property>
-                                            <property name="action">select-folder</property>
                                             <property name="show_hidden">True</property>
+                                            <property name="action">select-folder</property>
                                           </object>
                                           <packing>
                                             <property name="expand">False</property>
@@ -743,8 +783,8 @@
                                         <child>
                                           <object class="GtkFileChooserButton" id="downloads_filechooserbutton">
                                             <property name="visible">True</property>
-                                            <property name="action">select-folder</property>
                                             <property name="show_hidden">True</property>
+                                            <property name="action">select-folder</property>
                                           </object>
                                           <packing>
                                             <property name="expand">False</property>
@@ -1118,10 +1158,19 @@
                     <property name="left_padding">10</property>
                     <property name="right_padding">10</property>
                     <child>
-                      <object class="GtkTreeView" id="downloads_treeview">
+                      <object class="GtkScrolledWindow" id="scrolledwindow4">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="model">downloads_liststore</property>
+                        <property name="hscrollbar_policy">automatic</property>
+                        <property name="vscrollbar_policy">automatic</property>
+                        <property name="shadow_type">out</property>
+                        <child>
+                          <object class="GtkTreeView" id="downloads_treeview">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="model">downloads_liststore</property>
+                          </object>
+                        </child>
                       </object>
                     </child>
                   </object>
@@ -1176,5 +1225,35 @@
     <property name="upper">65535</property>
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
+  </object>
+  <object class="GtkTextBuffer" id="package_textbuffer">
+    <property name="text" translatable="yes">To get started, select a package on the left.
+
+You can view the details of the package and click the Download button to get a package and all of its dependencies.
+
+This text will be revised later. :)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Hey what are you doing all the way down here? :P  Just testing the scroll, the scroll, the buttons, the buttons. The scroll so smooth like the butter on a muffin.</property>
   </object>
 </interface>

@@ -16,6 +16,7 @@
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
 ### END LICENSE
 
+import logging
 import sys
 import os
 import platform
@@ -153,6 +154,33 @@ class KeryxWindow(gtk.Window):
         self._get("proxy_port_spinbutton").set_value(float(self.config.get("proxy_port")))
         self._get("proxy_username_entry").set_text(self.config.get("proxy_username"))
         self._get("proxy_password_entry").set_text(self.config.get("proxy_password"))
+        
+        for root, dirs, files in os.walk(self.config.get("projects")):
+            for computer in [filename for filename in files if filename.endswith(".keryx")]:
+                self.computers_list.append([computer[:-6], root])
+
+
+    def on_manage_button_clicked(self, widget, data=None):
+        model, row = self._get("computers_treeview").get_selection().get_selected()
+        try: 
+            name = model.get_value(row, 0)
+            path = model.get_value(row, 1)
+        except TypeError, e:
+            error_dialog(self,
+                         "You must select a computer to manage first.\n\n" \
+                         "If no computers are listed, try adding a new one.",
+                         "No computer selected")
+            return
+        
+        # Update computer tab
+        self.computer.set_visible(True)
+        self._get("name_label").set_text(name)
+        self.notebook.set_current_page(1)
+        
+        self._get("package_name_label").set_text("Getting Started")
+        textbuffer = self._get("package_textbuffer")
+        #TODO: Set reset default text
+        #textbuffer.set_text()
 
 
     #TODO: Move errors to their own function to be called easily
@@ -176,18 +204,19 @@ class KeryxWindow(gtk.Window):
         if os.path.exists(path):
             error_dialog(self, 
                          "The computer appears to have already been added.\n" \
-                         "Make sure you to use a different name for each " \
+                         "\nMake sure you to use a different name for each " \
                          "computer.",
                          "Error Adding Computer")
-            print path
+            logging.error("Computer already managed: %s" % path)
             return
         
         os.makedirs(path)
-        f = open(os.path.join(path, "%s.keryx" % name), "wb")
+        filename = "%s.keryx" % name
+        f = open(os.path.join(path, filename), "wb")
         f.write("%s\napt" % name)
         f.close()
         
-        self.computers_list.append([name])
+        self.computers_list.append([name, path])
         
         f = open(os.path.join(path, "apt.conf"), "wb")
         f.write("%s\n%s\n%s\n%s" % (platform.uname()[1], 
@@ -199,10 +228,9 @@ class KeryxWindow(gtk.Window):
         #TODO: Copy status and lists files
         
         info_dialog(self, 
-                    "Computer added successfully!\nNow you can click Manage " \
-                    "to select some packages to download later or you can " \
-                    "move Keryx to a computer with internet access to get " \
-                    "started.",
+                    "Computer added successfully!\n\nTo get started, take " \
+                    "Keryx to a computer with internet access or\nyou can " \
+                    "click Manage now to mark packages to download later.",
                     "Everything Went Better Than Expected")
         
     def about(self, widget, data=None):
@@ -266,7 +294,6 @@ class KeryxWindow(gtk.Window):
 
 if __name__ == "__main__":
     # Support for command line options.
-    import logging
     import optparse
     parser = optparse.OptionParser(version="%prog %ver")
     parser.add_option(
