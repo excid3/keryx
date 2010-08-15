@@ -576,6 +576,7 @@
                                 <property name="model">packages_liststore</property>
                                 <property name="search_column">0</property>
                                 <property name="enable_grid_lines">horizontal</property>
+                                <signal name="cursor_changed" handler="on_packages_treeview_cursor_changed"/>
                                 <child>
                                   <object class="GtkTreeViewColumn" id="packages_treeviewcolumn">
                                     <property name="title">Package Name</property>
@@ -637,25 +638,51 @@
                                 </child>
                               </object>
                               <packing>
+                                <property name="padding">5</property>
                                 <property name="position">1</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkHButtonBox" id="hbuttonbox1">
+                              <object class="GtkHBox" id="hbox1">
                                 <property name="visible">True</property>
-                                <property name="layout_style">end</property>
+                                <child>
+                                  <object class="GtkLabel" id="label22">
+                                    <property name="visible">True</property>
+                                    <property name="xalign">0</property>
+                                    <property name="label" translatable="yes">Installed Version:</property>
+                                    <attributes>
+                                      <attribute name="weight" value="bold"/>
+                                    </attributes>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="padding">5</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="label23">
+                                    <property name="visible">True</property>
+                                    <property name="xalign">0</property>
+                                    <property name="label" translatable="yes">None</property>
+                                  </object>
+                                  <packing>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
                                 <child>
                                   <object class="GtkButton" id="button4">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
                                     <child>
-                                      <object class="GtkHBox" id="hbox1">
+                                      <object class="GtkHBox" id="hbox3">
                                         <property name="visible">True</property>
                                         <child>
                                           <object class="GtkImage" id="image5">
                                             <property name="visible">True</property>
                                             <property name="stock">gtk-go-down</property>
+                                            <property name="icon-size">2</property>
                                           </object>
                                           <packing>
                                             <property name="position">0</property>
@@ -676,7 +703,7 @@
                                   <packing>
                                     <property name="expand">False</property>
                                     <property name="fill">False</property>
-                                    <property name="position">0</property>
+                                    <property name="position">2</property>
                                   </packing>
                                 </child>
                               </object>

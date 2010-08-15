@@ -16,11 +16,12 @@
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
 ### END LICENSE
 
+import gtk
 import logging
-import sys
 import os
 import platform
-import gtk
+import shutil
+import sys
 
 import gettext
 from gettext import gettext as _
@@ -52,6 +53,9 @@ from keryx.helpers import create_tab, create_closeable_tab, get_builder
 
 class KeryxWindow(gtk.Window):
     __gtype_name__ = "KeryxWindow"
+    
+    # This stores the currently opened computer
+    computer = None    
     
     # To construct a new instance of this method, the following notable 
     # methods are called in this order:
@@ -114,14 +118,15 @@ class KeryxWindow(gtk.Window):
         self._initial_configuration()
         self.load_config()
         
+        
     def _initial_configuration(self):
         """Initialize and assign widgets to variables"""
-        self.computer = self._get("computer_tab")
-        self.preferences = self._get("preferences_tab")
-        self.downloads = self._get("downloads_tab")
-        self.computer.set_visible(False)
-        #self.preferences.set_visible(False)
-        self.downloads.set_visible(False)
+        self.computer_tab = self._get("computer_tab")
+        self.preferences_tab = self._get("preferences_tab")
+        self.downloads_tab = self._get("downloads_tab")
+        self.computer_tab.set_visible(False)
+        self.preferences_tab.set_visible(False)
+        self.downloads_tab.set_visible(False)
         
         self.computers_list = self._get("computers_liststore")
         self.computers_list.clear()
@@ -172,8 +177,10 @@ class KeryxWindow(gtk.Window):
                          "No computer selected")
             return
         
+        self.load_computer(name, path)
+        
         # Update computer tab
-        self.computer.set_visible(True)
+        self.computer_tab.set_visible(True)
         self._get("name_label").set_text(name)
         self.notebook.set_current_page(1)
         
@@ -181,6 +188,53 @@ class KeryxWindow(gtk.Window):
         textbuffer = self._get("package_textbuffer")
         #TODO: Set reset default text
         textbuffer.set_text("Ohai, select a package on the left.")
+        
+        
+    #TODO: Move to a separate file
+    def load_computer(self, name, path):
+        from keryx.unwrapt import loader
+
+        client = loader.load("apt")
+
+        self.computer = {"Name": name,
+                         "Path": path,
+                         "Client": client}
+         
+        f = open(os.path.join(path, "apt.conf"), "rb")
+        lines = f.readlines() 
+        f.close()
+        
+        # Read apt.conf
+        hostname = lines[0].strip()
+        dist, version, codename = [line.strip() for line in lines[1].split()]
+        arch = lines[2].strip()
+        kernel = lines[3].strip()
+        #print hostname, dist, version, codename, arch, kernel
+        
+        # Set computer properties
+        client.set_architecture(arch)
+        client.set_status(os.path.join(path, "status"))
+        
+        # Set repositories
+        f = open(os.path.join(path, "sources.list"), "rb")
+        repos = [line.strip() for line in f.readlines() if line.strip()]
+        f.close()
+        
+        client.set_repositories(repos)
+        client.update() #TODO: reporthook
+        
+        
+        for item in client.get_available_package_names():
+            self.packages_list.append([item])
+            
+        self.packages_list.set_sort_column_id(0, gtk.SORT_ASCENDING)
+
+
+    def on_packages_treeview_cursor_changed(self, widget, data=None):
+        model, row = self._get("packages_treeview").get_selection().get_selected()
+        name = model.get_value(row, 0)
+        package = self.computer["Client"].get_latest_binary(name)
+            
 
 
     #TODO: Move errors to their own function to be called easily
@@ -218,14 +272,25 @@ class KeryxWindow(gtk.Window):
         
         self.computers_list.append([name, path])
         
+        arch = platform.machine()
+        if arch == "x86_64":
+            arch = "amd64"
+        
         f = open(os.path.join(path, "apt.conf"), "wb")
         f.write("%s\n%s\n%s\n%s" % (platform.uname()[1], 
                                     " ".join(platform.linux_distribution()), 
-                                    platform.machine(),
+                                    arch,
                                     platform.release()))
         f.close()
         
-        #TODO: Copy status and lists files
+        # Copy all .list files
+        for root, dirs, files in os.walk("/etc/apt/"):
+            for sources_list in [filename for filename in files 
+                                 if filename.endswith(".list")]:
+                shutil.copy(os.path.join(root, sources_list), 
+                            os.path.join(path, sources_list))
+        
+        shutil.copy("/var/lib/dpkg/status", os.path.join(path, "status"))
         
         info_dialog(self, 
                     "Computer added successfully!\n\nTo get started, take " \
@@ -241,10 +306,10 @@ class KeryxWindow(gtk.Window):
 
     def preferences(self, widget, data=None):
         """Display the preferences window for keryx."""
-        visible = self.preferences.get_visible()
-        self.preferences.set_visible(not visible)
+        visible = self.preferences_tab.get_visible()
+        self.preferences_tab.set_visible(not visible)
         if not visible:
-            self.notebook.set_current_page(self.notebook.page_num(self.preferences))
+            self.notebook.set_current_page(self.notebook.page_num(self.preferences_tab))
      
     def quit(self, widget, data=None):
         """Signal handler for closing the KeryxWindow."""
@@ -309,4 +374,6 @@ if __name__ == "__main__":
     # Run the application.
     window = KeryxWindow()
     window.show()
+    gtk.gdk.threads_enter()
     gtk.main()
+    gtk.gdk.threads_leave()
