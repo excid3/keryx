@@ -180,7 +180,7 @@ class KeryxWindow(gtk.Window):
         self._get("package_name_label").set_text("Getting Started")
         textbuffer = self._get("package_textbuffer")
         #TODO: Set reset default text
-        #textbuffer.set_text()
+        textbuffer.set_text("Ohai, select a package on the left.")
 
 
     #TODO: Move errors to their own function to be called easily
