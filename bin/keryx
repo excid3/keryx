@@ -217,8 +217,27 @@ class KeryxWindow(gtk.Window):
         
         # Set repositories
         f = open(os.path.join(path, "sources.list"), "rb")
-        repos = [line.strip() for line in f.readlines() if line.strip()]
+        repos = f.readlines()
         f.close()
+        
+        def valid_line(line):
+            """
+                Verify a sources line
+            """
+            line = line.strip()
+            
+            # Line must not be empty
+            # Line must not be a comment
+            # Line must have 4+ sections separated by spaces
+            if not line or line.startswith("#") or len(line.split()) < 4:
+                return
+                
+            return line
+            
+            
+        
+        # Parse for valid repos
+        repos = [valid_line(line) for line in repos if valid_line(line)]
         
         client.set_repositories(repos)
         client.update() #TODO: reporthook
@@ -234,7 +253,14 @@ class KeryxWindow(gtk.Window):
         model, row = self._get("packages_treeview").get_selection().get_selected()
         name = model.get_value(row, 0)
         package = self.computer["Client"].get_latest_binary(name)
-            
+        
+        self._get("package_name_label").set_text(name)
+        
+        textbuf = self._get("package_textbuffer")
+        textbuf.set_text(package["Long"])
+
+        #self.computer["Client"].get_package_status(
+        #self._get("installed_label").set_text(
 
 
     #TODO: Move errors to their own function to be called easily
