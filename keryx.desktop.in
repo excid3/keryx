@@ -1,8 +1,0 @@
-[Desktop Entry]
-_Name=Keryx
-_Comment=Keryx application
-Categories=GNOME;Utility;
-Exec=keryx
-Icon=keryx
-Terminal=false
-Type=Application
