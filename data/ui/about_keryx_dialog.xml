@@ -1,9 +1,0 @@
-<glade-catalog name="about_keryx_dialog" domain="glade-3" 
-               depends="gtk+" version="1.0">
-  <glade-widget-classes>
-    <glade-widget-class title="About Keryx Dialog" name="AboutKeryxDialog" 
-                        generic-name="AboutKeryxDialog" parent="GtkAboutDialog"
-                        icon-name="widget-gtk-about-dialog"/>
-  </glade-widget-classes>
-
-</glade-catalog>
