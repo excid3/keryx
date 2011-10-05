@@ -3,16 +3,16 @@
 ### BEGIN LICENSE
 # Copyright (C) 2010 Chris Oliver <chris@excid3.com>
 #                    mac9416 <mac9416@keryxproject.org>
-# This program is free software: you can redistribute it and/or modify it 
-# under the terms of the GNU General Public License version 3, as published 
+# This program is free software: you can redistribute it and/or modify it
+# under the terms of the GNU General Public License version 3, as published
 # by the Free Software Foundation.
-# 
-# This program is distributed in the hope that it will be useful, but 
-# WITHOUT ANY WARRANTY; without even the implied warranties of 
-# MERCHANTABILITY, SATISFACTORY QUALITY, or FITNESS FOR A PARTICULAR 
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranties of
+# MERCHANTABILITY, SATISFACTORY QUALITY, or FITNESS FOR A PARTICULAR
 # PURPOSE.  See the GNU General Public License for more details.
-# 
-# You should have received a copy of the GNU General Public License along 
+#
+# You should have received a copy of the GNU General Public License along
 # with this program.  If not, see <http://www.gnu.org/licenses/>.
 ### END LICENSE
 
@@ -62,11 +62,11 @@ from keryx.helpers import create_tab, create_closeable_tab, get_builder
 
 class KeryxWindow(gtk.Window):
     __gtype_name__ = "KeryxWindow"
-    
+
     # This stores the currently opened computer
-    computer = None    
-    
-    # To construct a new instance of this method, the following notable 
+    computer = None
+
+    # To construct a new instance of this method, the following notable
     # methods are called in this order:
     # __new__(cls)
     # __init__(self)
@@ -75,11 +75,11 @@ class KeryxWindow(gtk.Window):
     #
     # For this reason, it's recommended you leave __init__ empty and put
     # your inialization code in finish_intializing
-    
+
     def __new__(cls):
-        """Special static method that's automatically called by Python when 
+        """Special static method that's automatically called by Python when
         constructing a new instance of this class.
-        
+
         Returns a fully instantiated KeryxWindow object.
         """
         builder = get_builder('KeryxWindow')
@@ -93,7 +93,7 @@ class KeryxWindow(gtk.Window):
         finish_initalizing should be called after parsing the UI definition
         and creating a KeryxWindow object with it in order to finish
         initializing the start of the new KeryxWindow instance.
-        
+
         Put your initilization code in here and leave __init__ undefined.
         """
         # Get a reference to the builder and set up the signals.
@@ -116,18 +116,18 @@ class KeryxWindow(gtk.Window):
 
         # Code for other initialization actions should be added here.
         self.notebook = self._get("notebook")
-         
+
         name = self._get("add_computer_name_entry")
-        name.set_text(platform.node()) 
-               
+        name.set_text(platform.node())
+
         # Request default window size
         self.set_size_request(600, 400)
-        
+
         # Assign widgets
         self._initial_configuration()
         self.load_config()
-        
-        
+
+
     def _initial_configuration(self):
         """Initialize and assign widgets to variables"""
         self.computer_tab = self._get("computer_tab")
@@ -136,14 +136,14 @@ class KeryxWindow(gtk.Window):
         self.computer_tab.set_visible(False)
         self.preferences_tab.set_visible(False)
         self.downloads_tab.set_visible(False)
-        
+
         self.computers_list = self._get("computers_liststore")
         self.computers_list.clear()
-        
+
         self.packages_list = self._get("packages_liststore")
         self.packages_list.clear()
-        
-        
+
+
     def load_config(self):
         # Create and set the projects folder
         projects_chooser = self._get("projects_filechooserbutton")
@@ -151,14 +151,14 @@ class KeryxWindow(gtk.Window):
         if not os.path.exists(path):
             os.makedirs(path)
         projects_chooser.set_current_folder(path)
-        
+
         # Create and set the downloads folder
         downloads_chooser = self._get("downloads_filechooserbutton")
         path = os.path.abspath(self.config.get("downloads"))
         if not os.path.exists(path):
             os.makedirs(path)
         downloads_chooser.set_current_folder(path)
-        
+
         # Set proxy
         active = self.config.get("proxy") == "True"
         self._get("proxy_manual_radiobutton").set_active(active)
@@ -168,7 +168,7 @@ class KeryxWindow(gtk.Window):
         self._get("proxy_port_spinbutton").set_value(float(self.config.get("proxy_port")))
         self._get("proxy_username_entry").set_text(self.config.get("proxy_username"))
         self._get("proxy_password_entry").set_text(self.config.get("proxy_password"))
-        
+
         for root, dirs, files in os.walk(self.config.get("projects")):
             for computer in [filename for filename in files if filename.endswith(".keryx")]:
                 self.computers_list.append([computer[:-6], root])
@@ -176,7 +176,7 @@ class KeryxWindow(gtk.Window):
 
     def on_manage_button_clicked(self, widget, data=None):
         model, row = self._get("computers_treeview").get_selection().get_selected()
-        try: 
+        try:
             name = model.get_value(row, 0)
             path = model.get_value(row, 1)
         except TypeError, e:
@@ -185,20 +185,20 @@ class KeryxWindow(gtk.Window):
                          "If no computers are listed, try adding a new one.",
                          "No computer selected")
             return
-        
+
         self.load_computer(name, path)
-        
+
         # Update computer tab
         self.computer_tab.set_visible(True)
         self._get("name_label").set_text(name)
         self.notebook.set_current_page(1)
-        
+
         self._get("package_name_label").set_text("Getting Started")
         textbuffer = self._get("package_textbuffer")
         #TODO: Set reset default text
         textbuffer.set_text("Ohai, select a package on the left.")
-        
-        
+
+
     #TODO: Move to a separate file
     def load_computer(self, name, path):
         from keryx.unwrapt import loader
@@ -208,65 +208,66 @@ class KeryxWindow(gtk.Window):
         self.computer = {"Name": name,
                          "Path": path,
                          "Client": client}
-         
+
         f = open(os.path.join(path, "apt.conf"), "rb")
-        lines = f.readlines() 
+        lines = f.readlines()
         f.close()
-        
+
         # Read apt.conf
         hostname = lines[0].strip()
         dist, version, codename = [line.strip() for line in lines[1].split()]
         arch = lines[2].strip()
         kernel = lines[3].strip()
         #print hostname, dist, version, codename, arch, kernel
-        
+
         # Set computer properties
         client.set_architecture(arch)
         client.set_status(os.path.join(path, "status"))
-        
+
         # Set repositories
         f = open(os.path.join(path, "sources.list"), "rb")
         repos = f.readlines()
         f.close()
-        
+
         def valid_line(line):
             """
                 Verify a sources line
             """
             line = line.strip()
-            
+
             # Line must not be empty
             # Line must not be a comment
             # Line must have 4+ sections separated by spaces
             if not line or line.startswith("#") or len(line.split()) < 4:
                 return
-                
+
             return line
-            
-            
-        
+
+
+
         # Parse for valid repos
         repos = [valid_line(line) for line in repos if valid_line(line)]
-        
+
         client.set_repositories(repos)
         client.update() #TODO: reporthook
-        
-        
+
+
         for item in client.get_available_package_names():
             self.packages_list.append([item])
-            
+
         self.packages_list.set_sort_column_id(0, gtk.SORT_ASCENDING)
 
 
     def on_packages_treeview_cursor_changed(self, widget, data=None):
         model, row = self._get("packages_treeview").get_selection().get_selected()
-        name = model.get_value(row, 0)
-        package = self.computer["Client"].get_latest_binary(name)
-        
-        self._get("package_name_label").set_text(name)
-        
-        textbuf = self._get("package_textbuffer")
-        textbuf.set_text(package["Long"])
+        if row:
+            name = model.get_value(row, 0)
+            package = self.computer["Client"].get_latest_binary(name)
+
+            self._get("package_name_label").set_text(name)
+
+            textbuf = self._get("package_textbuffer")
+            textbuf.set_text(package["Long"])
 
         #self.computer["Client"].get_package_status(
         #self._get("installed_label").set_text(
@@ -276,63 +277,63 @@ class KeryxWindow(gtk.Window):
     def on_add_button_clicked(self, widget, data=None):
         status_file = "/var/lib/dpkg/status"
         sources_file = "/etc/apt/sources.list"
-        
+
         if not platform.system() == "Linux" or \
            not os.path.exists(status_file) or \
            not os.path.exists(sources_file):  # FIXME: Not everyone has a main sources_file.
-            error_dialog(self, 
+            error_dialog(self,
                          "Sorry, you can only add Debian based Linux " \
                          "distros.\nPlease use Keryx on your offline " \
                          "machine.",
                          "Error adding computer")
             return
-    
+
         name = self._get("add_computer_name_entry").get_text()
-        
+
         path = os.path.join(self.config.get("projects"), name)
         if os.path.exists(path):
-            error_dialog(self, 
+            error_dialog(self,
                          "The computer appears to have already been added.\n" \
                          "\nMake sure you to use a different name for each " \
                          "computer.",
                          "Error Adding Computer")
             logging.error("Computer already managed: %s" % path)
             return
-        
+
         os.makedirs(path)
         filename = "%s.keryx" % name
         f = open(os.path.join(path, filename), "wb")
         f.write("%s\napt" % name)
         f.close()
-        
+
         self.computers_list.append([name, path])
-        
+
         arch = platform.machine()
         if arch == "x86_64":
             arch = "amd64"
-        
+
         f = open(os.path.join(path, "apt.conf"), "wb")
-        f.write("%s\n%s\n%s\n%s" % (platform.uname()[1], 
-                                    " ".join(platform.linux_distribution()), 
+        f.write("%s\n%s\n%s\n%s" % (platform.uname()[1],
+                                    " ".join(platform.linux_distribution()),
                                     arch,
                                     platform.release()))
         f.close()
-        
+
         # Copy all .list files
         for root, dirs, files in os.walk("/etc/apt/"):
-            for sources_list in [filename for filename in files 
+            for sources_list in [filename for filename in files
                                  if filename.endswith(".list")]:
-                shutil.copy(os.path.join(root, sources_list), 
+                shutil.copy(os.path.join(root, sources_list),
                             os.path.join(path, sources_list))
-        
+
         shutil.copy("/var/lib/dpkg/status", os.path.join(path, "status"))
-        
-        info_dialog(self, 
+
+        info_dialog(self,
                     "Computer added successfully!\n\nTo get started, take " \
                     "Keryx to a computer with internet access or\nyou can " \
                     "click Manage now to mark packages to download later.",
                     "Everything Went Better Than Expected")
-        
+
     def about(self, widget, data=None):
         """Display the about box for keryx."""
         about = AboutKeryxDialog.AboutKeryxDialog()
@@ -345,7 +346,7 @@ class KeryxWindow(gtk.Window):
         self.preferences_tab.set_visible(not visible)
         if not visible:
             self.notebook.set_current_page(self.notebook.page_num(self.preferences_tab))
-     
+
     def quit(self, widget, data=None):
         """Signal handler for closing the KeryxWindow."""
         self.destroy()
@@ -355,15 +356,15 @@ class KeryxWindow(gtk.Window):
         # Clean up code for saving application state should be added here.
         self.config.save()
         gtk.main_quit()
-        
+
     def on_proxy_manual_radiobutton_toggled(self, widget, data=None):
         """Called when Manual proxy configuration is toggled"""
-        widgets = ["proxy_entry", 
-                   "proxy_port_spinbutton", 
-                   "proxy_username_entry", 
+        widgets = ["proxy_entry",
+                   "proxy_port_spinbutton",
+                   "proxy_username_entry",
                    "proxy_password_entry"]
         s = widget.get_active()
-        
+
         # Set manual proxy entries sensitive as necessary
         for item in widgets:
             self._get(item).set_sensitive(s)
@@ -371,24 +372,24 @@ class KeryxWindow(gtk.Window):
     def on_preferences_changed(self, widget, data=None):
         self.config.set("projects", self._get("projects_filechooserbutton").get_current_folder())
         self.config.set("downloads", self._get("downloads_filechooserbutton").get_current_folder())
-        
+
         self.config.set("proxy", self._get("proxy_manual_radiobutton").get_active())
         self.config.set("proxy_url", self._get("proxy_entry").get_text())
         self.config.set("proxy_port", str(self._get("proxy_port_spinbutton").get_value()))
         self.config.set("proxy_username", self._get("proxy_username_entry").get_text())
         self.config.set("proxy_password", self._get("proxy_password_entry").get_text())
-        
+
         self.config.save()
-        
+
         self._get("preferences_label").set_text("Preferences saved to %s" % self.config.get_filename())
-        
+
     def on_preferences_reset(self, widget, data=None):
         self._get("preferences_label").set_text("Preferences reset")
         self.load_config()
-        
+
     def on_switch_tab(self, notebook, page, page_num, data=None):
         self._get("preferences_label").set_text("Click Save to apply changes")
-        
+
     def _get(self, name):
         return self.builder.get_object(name)
 
