@@ -52,8 +52,16 @@ class KeryxWindow(Window):
             self._open_profile(profile_path)
 
 
+    def on_mnu_open_activate(self, widget, data=None):
+        self._browse()
+
     def on_browse_button_clicked(self, widget, data=None):
-        dialog = gtk.FileChooserDialog(title=None,action=gtk.FILE_CHOOSER_ACTION_OPEN,
+        self._browse()
+
+    def _browse(self):
+        dialog = gtk.FileChooserDialog(title="Open Profile",
+                parent=self,
+                action=gtk.FILE_CHOOSER_ACTION_OPEN,
                 buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_OPEN,gtk.RESPONSE_OK))
         dialog.set_current_folder(self._find_path())
 
