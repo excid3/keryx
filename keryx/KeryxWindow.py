@@ -41,6 +41,36 @@ class KeryxWindow(Window):
         self._initialize_home()
 
 
+    def _open_profile(self, profile_path):
+        print profile_path
+
+
+    def on_manage_button_clicked(self, widgt, data=None):
+        model, row_iter = self.ui.computers_treeview.get_selection().get_selected()
+        if row_iter:
+            profile_path = model.get_value(row_iter, 1)
+            self._open_profile(profile_path)
+
+
+    def on_browse_button_clicked(self, widget, data=None):
+        dialog = gtk.FileChooserDialog(title=None,action=gtk.FILE_CHOOSER_ACTION_OPEN,
+                buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_OPEN,gtk.RESPONSE_OK))
+        dialog.set_current_folder(self._find_path())
+
+        keryx_filter = gtk.FileFilter()
+        keryx_filter.set_name("Keryx profiles")
+        keryx_filter.add_pattern("*.keryx")
+
+        dialog.add_filter(keryx_filter)
+
+        response = dialog.run()
+        profile_path = dialog.get_filename() if response == gtk.RESPONSE_OK else None
+        dialog.destroy()
+
+        if profile_path:
+            self._open_profile(profile_path)
+
+
     def on_add_profile_button_clicked(self, widget, data=None):
         # Find our output directory
         path_used = self._find_path()
