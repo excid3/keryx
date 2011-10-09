@@ -40,9 +40,14 @@ def main():
     preferences.db_connect()
     preferences.load()
 
-    # Run the application.    
+    # Initialize threading.
+    gtk.gdk.threads_init()
+
+    # Run the application.
     window = KeryxWindow.KeryxWindow()
     window.show()
+    gtk.gdk.threads_enter()
     gtk.main()
-    
+    gtk.gdk.threads_leave()
+
     preferences.save()

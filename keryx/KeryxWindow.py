@@ -6,6 +6,7 @@
 import os
 import platform
 import shutil
+import threading
 import traceback
 
 import gettext
@@ -21,10 +22,12 @@ from keryx.AboutKeryxDialog import AboutKeryxDialog
 from keryx.PreferencesKeryxDialog import PreferencesKeryxDialog
 from keryx.MessageDialogs import *
 
+from keryx_lib import unwrapt
+
 EXT = ".keryx"
-SUPPORTED = ["Ubuntu"]
 PATHS = [os.path.abspath("data"),
          os.path.abspath(os.path.expanduser("~/keryx"))]
+HOME, PACKAGES, DOWNLOADS = 0,1,2 # Used for notebook current page
 
 # See keryx_lib.Window.py for more details about how this class works
 class KeryxWindow(Window):
@@ -39,11 +42,49 @@ class KeryxWindow(Window):
 
         # Code for other initialization actions should be added here.
         self._initialize_home()
+        self.set_status()
+        self.download = None
 
 
     def _open_profile(self, profile_path):
-        print profile_path
+        print "Opening %s" % profile_path
+        self.profile = unwrapt.Apt()
+        self.profile.download_directory = os.getcwd()
 
+        # Get the profile directory
+        profile_dir = os.path.dirname(profile_path)
+
+        # Parse the profile configuration
+        f = open(profile_path, "rb")
+        dist, version, version_name, arch = [x.strip() for x in f.readlines()]
+        f.close()
+
+        # Get the profile name from the filename
+        name = os.path.splitext(os.path.basename(profile_path))[0]
+
+        # Set the architecture
+        self.profile.set_architecture(arch)
+
+        # Set the repos
+        repositories = [x.strip() for x in open(os.path.join(profile_dir, "sources.list"), "rb").readlines()]
+        self.profile.set_repositories(repositories)
+
+        # Clean up interface
+        self.ui.packages_liststore.clear()
+        self.ui.notebook.set_current_page(DOWNLOADS)
+        self.set_status("Getting latest package lists...please wait.")
+
+        # Launch the unwrapt.update()
+        threading.Thread(target=self.profile.update,
+                args=(self.download_progress,(self.show_packages,))).start()
+
+    def show_packages(self):
+        """Once a profile is opened, set the interface correctly"""
+        self.ui.notebook.set_current_page(PACKAGES)
+        self.set_status()
+
+    def set_status(self, text="Ready")
+        self.ui.status_label.set_text(text)
 
     def on_manage_button_clicked(self, widgt, data=None):
         model, row_iter = self.ui.computers_treeview.get_selection().get_selected()
@@ -62,7 +103,10 @@ class KeryxWindow(Window):
         dialog = gtk.FileChooserDialog(title="Open Profile",
                 parent=self,
                 action=gtk.FILE_CHOOSER_ACTION_OPEN,
-                buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_OPEN,gtk.RESPONSE_OK))
+                buttons=(gtk.STOCK_CANCEL,
+                         gtk.RESPONSE_CANCEL,
+                         gtk.STOCK_OPEN,
+                         gtk.RESPONSE_OK))
         dialog.set_current_folder(self._find_path())
 
         keryx_filter = gtk.FileFilter()
@@ -108,13 +152,15 @@ class KeryxWindow(Window):
             # Alert that patient user the good news, we've got a project written
             # for them! :D
             info_dialog(self, "Your computer has been added successfully!\n" \
-                    "Take this profile to an online machine to download" \
+                    "Take this profile to an online machine to download " \
                     "packages.\n\n" \
                     "You can find the profile here:\n%s" % profile_dir)
         except Exception, e:
             traceback.print_exc()
             error_dialog(self, "There was a problem creating your profile: \n" \
                     "%s" % e)
+
+        #TODO: Close Keryx now?
 
 
     def _write_keryx_file(self, profile_path):
@@ -123,7 +169,7 @@ class KeryxWindow(Window):
         # - Version (11.04)
         # - Architecture (x86_64/i386)
         f = open(profile_path, "wb")
-        f.write("\n".join(platform.uname()[0:1]))
+        f.write("\n".join(platform.dist() + (platform.machine(),)))
         f.close()
 
     def _copy_sources(self, profile_dir):
@@ -143,7 +189,7 @@ class KeryxWindow(Window):
         self._load_profiles()
 
         # Hide the add computer expander if running an unsupported OS
-        if platform.uname()[0] != "Linux" or not platform.dist()[0] in SUPPORTED:
+        if platform.uname()[0] != "Linux" or not platform.dist()[0] in unwrapt.SUPPORTED:
             self.ui.add_expander.set_expanded(False)
 
 
