@@ -14,8 +14,9 @@ from gettext import gettext as _
 gettext.textdomain('keryx')
 
 import gtk
+import glib
 import logging
-logger = logging.getLogger('keryx')
+#logger = logging.getLogger('keryx')
 
 from keryx_lib import Window
 from keryx.AboutKeryxDialog import AboutKeryxDialog
@@ -42,12 +43,25 @@ class KeryxWindow(Window):
 
         # Code for other initialization actions should be added here.
         self._initialize_home()
-        self.set_status()
-        self.download = None
+        self._set_status()
+        self._set_current_download()
 
+    def _download_progress(self, url, display, current, total):
+        percent = current/float(total) * 100
+
+        if not self.download:
+            self._set_current_download(self.ui.downloads_liststore.append([url, percent]))
+
+        self.ui.downloads_liststore.set_value(self.download, 1, percent)
+
+        if percent == 100:
+            self._set_current_download()
+
+    def _set_current_download(self, download=None):
+        self.download = download
 
     def _open_profile(self, profile_path):
-        print "Opening %s" % profile_path
+        logging.info("Opening %s" % profile_path)
         self.profile = unwrapt.Apt()
         self.profile.download_directory = os.getcwd()
 
@@ -72,19 +86,26 @@ class KeryxWindow(Window):
         # Clean up interface
         self.ui.packages_liststore.clear()
         self.ui.notebook.set_current_page(DOWNLOADS)
-        self.set_status("Getting latest package lists...please wait.")
+        self._set_status("Getting latest package lists...please wait.")
 
         # Launch the unwrapt.update()
         threading.Thread(target=self.profile.update,
-                args=(self.download_progress,(self.show_packages,))).start()
+                args=(self._download_progress, # download progress
+                      self._parse_progress, # parsing lists progress
+                      (glib.idle_add,self._show_packages,) # callback
+                )).start()
 
-    def show_packages(self):
+    def _parse_progress(self, text):
+        self._set_status(text)
+
+    def _show_packages(self):
         """Once a profile is opened, set the interface correctly"""
         self.ui.notebook.set_current_page(PACKAGES)
-        self.set_status()
+        self._set_status()
 
-    def set_status(self, text="Ready")
+    def _set_status(self, text="Ready"):
         self.ui.status_label.set_text(text)
+        logging.info(text)
 
     def on_manage_button_clicked(self, widgt, data=None):
         model, row_iter = self.ui.computers_treeview.get_selection().get_selected()
