@@ -1,0 +1,5 @@
+#=============================================#
+# Keryx - Offline Package Management Made Easy#
+#=============================================#
+
+Keryx is a free, open source application for updating Linux. The Keryx Project started as a way for users with dialup, or low-bandwidth internet to be able to download and update packages on their debian based distribution of linux. Mainly built for Ubuntu, Keryx allows users to select packages to install, check for updates, and download these packages onto a USB portable storage device. The packages are saved onto the device and are then taken back to the Linux box that it originated from and are then installed.
