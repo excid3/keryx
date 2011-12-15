@@ -9,9 +9,10 @@
     <property name="has_separator">False</property>
     <property name="program_name">Keryx</property>
     <property name="version">0.1-public1</property>
-    <property name="copyright">Copyright (C) 2010 Chris Oliver &lt;chris@excid3.com&gt;</property>
+    <property name="copyright">Copyright (C) 2010 Chris Oliver &lt;chris@excid3.com&gt;
+    Copyright (C) 2011-2012 Zach Thibeau &lt;zachthibeau@keryxproject.org&gt;</property>
     <property name="website" />
-    <property name="license"># Copyright (C) 2010 Chris Oliver &lt;chris@excid3.com&gt;
+    <property name="license"># Copyright &copy; 2010 Chris Oliver &lt;chris@excid3.com&gt;
 #                    mac9416 &lt;mac9416@keryxproject.org&gt;
 # This program is free software: you can redistribute it and/or modify it 
 # under the terms of the GNU General Public License version 3, as published 
